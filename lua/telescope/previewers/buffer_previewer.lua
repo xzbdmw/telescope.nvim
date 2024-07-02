@@ -197,6 +197,7 @@ local handle_file_preview = function(filepath, bufnr, stat, opts)
 
     opts.start_time = vim.loop.hrtime()
     Path:new(filepath):_read_async(vim.schedule_wrap(function(data)
+      vim.b[bufnr].filepath = filepath
       if not vim.api.nvim_buf_is_valid(bufnr) then
         return
       end
@@ -246,13 +247,13 @@ local handle_file_preview = function(filepath, bufnr, stat, opts)
 end
 
 local PREVIEW_TIMEOUT_MS = 250
-local PREVIEW_FILESIZE_MB = 25
-local PREVIEW_HIGHLIGHT_MB = 1
+local PREVIEW_FILESIZE_MB = 1
+local PREVIEW_HIGHLIGHT_MB = 0.1
 
 previewers.file_maker = function(filepath, bufnr, opts)
   opts = vim.F.if_nil(opts, {})
   opts.preview = vim.F.if_nil(opts.preview, {})
-  opts.preview.timeout = vim.F.if_nil(opts.preview.timeout, PREVIEW_TIMEOUT_MS)
+  opts.preview.timeout = 20
   opts.preview.filesize_limit = vim.F.if_nil(opts.preview.filesize_limit, PREVIEW_FILESIZE_MB)
   opts.preview.highlight_limit = vim.F.if_nil(opts.preview.highlight_limit, PREVIEW_HIGHLIGHT_MB)
   opts.preview.msg_bg_fillchar = vim.F.if_nil(opts.preview.msg_bg_fillchar, "╱")
@@ -449,17 +450,17 @@ previewers.new_buffer_previewer = function(opts)
     end
 
     opts.define_preview(self, entry, status)
-
+    require("guess-indent").set_from_buffer("prevview", self.state.bufnr)
     vim.schedule(function()
       if not self or not self.state or not self.state.bufnr then
         return
       end
-
       if vim.api.nvim_buf_is_valid(self.state.bufnr) then
         vim.api.nvim_buf_call(self.state.bufnr, function()
           vim.api.nvim_exec_autocmds("User", {
             pattern = "TelescopePreviewerLoaded",
             data = {
+              winid = self.state.winid,
               title = entry.preview_title,
               bufname = self.state.bufname,
               filetype = putils.filetype_detect(self.state.bufname or ""),
