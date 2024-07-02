@@ -388,6 +388,7 @@ actions.close = function(prompt_bufnr)
   if cursor_valid and a.nvim_get_mode().mode == "i" and picker._original_mode ~= "i" then
     pcall(a.nvim_win_set_cursor, original_win_id, { original_cursor[1], original_cursor[2] + 1 })
   end
+  _G.last = nil
 end
 
 --- Close the Telescope window, usually used within an action<br>
@@ -1445,14 +1446,16 @@ actions.to_fuzzy_refine = function(prompt_bufnr)
     }
 
     local title = action_state.get_current_picker(prompt_bufnr).prompt_title
-    if title == "Live Grep" then
-      opts.prefix = "Find Word"
+    if title == "Live Grep" or vim.startswith(title, "Grep mode") then
+      opts.prefix = "Fuzzy mode | Grep string"
     elseif title == "LSP Dynamic Workspace Symbols" then
       opts.prefix = "LSP Workspace Symbols"
       opts.sorter = conf.prefilter_sorter {
         tag = "symbol_type",
         sorter = opts.sorter,
       }
+    elseif vim.startswith(title, "Fuzzy Mode") then
+      opts.prefix = "Grep mode | Grep string"
     else
       opts.prefix = "Fuzzy over"
     end
@@ -1461,7 +1464,7 @@ actions.to_fuzzy_refine = function(prompt_bufnr)
   end)()
 
   require("telescope.actions.generate").refine(prompt_bufnr, {
-    prompt_title = string.format("%s (%s)", opts.prefix, line),
+    prompt_title = string.format("%s: %s", opts.prefix, line),
     sorter = opts.sorter,
   })
 end

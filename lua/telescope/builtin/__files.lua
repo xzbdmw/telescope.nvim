@@ -253,7 +253,7 @@ files.grep_string = function(opts)
   opts.entry_maker = opts.entry_maker or make_entry.gen_from_vimgrep(opts)
   pickers
     .new(opts, {
-      prompt_title = "Find Word (" .. word:gsub("\n", "\\n") .. ")",
+      prompt_title = "Grep string: " .. word:gsub("\n", "\\n"),
       finder = finders.new_oneshot_job(args, opts),
       previewer = conf.grep_previewer(opts),
       sorter = conf.generic_sorter(opts),
