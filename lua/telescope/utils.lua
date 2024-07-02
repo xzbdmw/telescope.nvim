@@ -381,10 +381,12 @@ function utils.win_delete(name, win_id, force, bdelete)
   if not vim.api.nvim_win_is_valid(win_id) then
     return
   end
-
+  local origin = vim.o.eventignore
+  vim.o.eventignore = "all"
   if not pcall(vim.api.nvim_win_close, win_id, force) then
     log.trace("Unable to close window: ", name, "/", win_id)
   end
+  vim.o.eventignore = origin
 end
 
 function utils.max_split(s, pattern, maxsplit)

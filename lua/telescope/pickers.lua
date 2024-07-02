@@ -364,7 +364,7 @@ function Picker:new(opts)
       obj:register_completion_callback(on_complete_item)
     end
   end
-
+  _G.telescope_picker = obj
   return obj
 end
 
@@ -511,6 +511,11 @@ end
 ---@param bufnr number: the buffer number to be used in the window
 ---@param popup_opts table: options to pass to `popup.create`
 function Picker:_create_window(bufnr, popup_opts)
+  popup_opts.zindex = 32
+  if popup_opts.highlight == "TelescopePreviewNormal" then
+    popup_opts.zindex = 30
+  end
+  _G.no_animation()
   local what = bufnr or ""
   local win, opts = popup.create(what, popup_opts)
 
@@ -567,7 +572,8 @@ function Picker:find()
   -- want to scroll through more than 10,000 items.
   --
   -- This just lets us stop doing stuff after tons of  things.
-  self.max_results = self.__scrolling_limit
+  -- self.max_results = self.__scrolling_limit
+  self.max_results = 1000
 
   vim.api.nvim_buf_set_lines(self.results_bufnr, 0, self.max_results, false, utils.repeated_table(self.max_results, ""))
 
@@ -1043,6 +1049,10 @@ function Picker:set_selection(row)
     return
   end
 
+  -- Picker:set_selection row: 119
+  -- Picker:set_selection self.manager:num_results(): 357
+  -- default_selection_index 有时候不生效的原因是如果row>max_results 那么就会重置为1
+  -- 而如果没大于呢 就是什么都没选中的效果
   row = self.scroller(self.max_results, self.manager:num_results(), row)
 
   if not self:can_select_row(row) then
@@ -1150,6 +1160,40 @@ function Picker:set_selection(row)
   self._selection_row = row
 
   vim.api.nvim_win_set_cursor(self.results_win, { row + 1, 0 })
+  if _G.aerial == true then
+    pcall(function()
+      local e = self:get_selection()
+      local col = e.col
+      local s_line = e.lnum
+      local e_line = e.value.end_lnum
+      local buffer = _G.a_buf
+      local win = _G.a_win
+      local ns = vim.api.nvim_create_namespace "symbol_highlight"
+      vim.api.nvim_buf_clear_namespace(buffer, ns, 0, -1)
+      if s_line == e_line then
+        vim.api.nvim_buf_set_extmark(buffer, ns, s_line - 1, 0, {
+          line_hl_group = "SymbolHighlight",
+        })
+      else
+        vim.api.nvim_buf_set_extmark(buffer, ns, s_line - 1, 0, {
+          end_line = e_line - 1,
+          end_col = 0,
+          line_hl_group = "SymbolHighlight",
+        })
+      end
+      vim.api.nvim_win_set_cursor(win, {
+        s_line,
+        col,
+      })
+      vim.api.nvim_win_call(win, function()
+        vim.cmd "norm! zz"
+      end)
+      pcall(_G.indent_update, win)
+      pcall(function()
+        require("treesitter-context").context_force_update(buffer, win)
+      end)
+    end)
+  end
 end
 
 --- Update prefix for entry on a given row
@@ -1459,7 +1503,11 @@ function Picker:get_result_completor(results_bufnr, find_id, prompt, status_upda
       vim.api.nvim_win_set_cursor(self.results_win, { self.max_results - visible_result_rows, 1 })
       vim.api.nvim_win_set_cursor(self.results_win, { self.max_results, 1 })
     else
-      vim.api.nvim_win_set_cursor(self.results_win, { 1, 0 })
+      if not _G.first_time then
+        vim.api.nvim_win_set_cursor(self.results_win, { 1, 0 })
+      end
+      _G.first_time = false
+      -- there is where view out of control
     end
     self:_on_complete()
   end)
@@ -1488,7 +1536,7 @@ function Picker:_do_selection(prompt)
       end
     end
   elseif selection_strategy == "reset" then
-    if self.default_selection_index ~= nil then
+    if self.default_selection_index ~= nil and _G.first_time then
       self:set_selection(self:get_row(self.default_selection_index))
     else
       self:set_selection(self:get_reset_row())
@@ -1561,6 +1609,7 @@ end
 --- Close the picker which has prompt with buffer number `prompt_bufnr`
 ---@param prompt_bufnr number
 function pickers.on_close_prompt(prompt_bufnr)
+  require("treesitter-context").close_all()
   local status = state.get_status(prompt_bufnr)
   local picker = status.picker
   require("telescope.actions.state").get_current_history():reset()
@@ -1626,6 +1675,16 @@ function pickers.on_close_prompt(prompt_bufnr)
     buffer = prompt_bufnr,
   }
   picker.close_windows(status)
+  if _G.aerial then
+    local ns = vim.api.nvim_create_namespace "symbol_highlight"
+    if vim.api.nvim_buf_is_valid(_G.a_buf) and vim.api.nvim_win_is_valid(_G.a_win) then
+      vim.api.nvim_buf_clear_namespace(_G.a_buf, ns, 0, -1)
+      vim.api.nvim_win_call(_G.a_win, function()
+        vim.fn.winrestview(_G.aerial_view)
+      end)
+    end
+  end
+  _G.aerial = false
 end
 
 function pickers.on_resize_window(prompt_bufnr)
