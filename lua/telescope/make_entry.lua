@@ -916,7 +916,7 @@ end
 
 function make_entry.gen_from_buffer_lines(opts)
   local displayer = entry_display.create {
-    separator = " │ ",
+    separator = "│ ",
     items = {
       { width = 5 },
       { remaining = true },
@@ -925,7 +925,7 @@ function make_entry.gen_from_buffer_lines(opts)
 
   local make_display = function(entry)
     return displayer {
-      { entry.lnum, opts.lnum_highlight_group or "TelescopeResultsSpecialComment" },
+      { entry.lnum, opts.lnum_highlight_group or "LineNr" },
       {
         entry.text,
         function()

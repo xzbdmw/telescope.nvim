@@ -121,7 +121,7 @@ entry_display.create = function(configuration)
         table.insert(results, str)
       end
     end
-
+    configuration.separator_hl = "LineNr"
     if configuration.separator_hl then
       local width = #configuration.separator or 1
 
