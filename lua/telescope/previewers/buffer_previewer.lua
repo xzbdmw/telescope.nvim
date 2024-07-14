@@ -532,19 +532,20 @@ previewers.vimgrep = defaulter(function(opts)
         col, colend = entry.col - 1, entry.colend - 1
       end
 
-      for i = lnum, lnend do
-        pcall(
-          vim.api.nvim_buf_add_highlight,
-          bufnr,
-          ns_previewer,
-          "TelescopePreviewLine",
-          i,
-          i == lnum and col or 0,
-          i == lnend and colend or -1
-        )
-      end
+      -- for i = lnum, lnend do
+      --   pcall(
+      --     vim.api.nvim_buf_add_highlight,
+      --     bufnr,
+      --     ns_previewer,
+      --     "TelescopePreviewLine",
+      --     i,
+      --     i == lnum and col or 0,
+      --     i == lnend and colend or -1
+      --   )
+      -- end
 
       local middle_ln = math.floor(lnum + (lnend - lnum) / 2)
+      vim.api.nvim_win_set_option(self.state.winid, "cursorline", true)
       pcall(vim.api.nvim_win_set_cursor, self.state.winid, { middle_ln + 1, 0 })
       vim.api.nvim_buf_call(bufnr, function()
         vim.cmd "norm! zz"
@@ -1064,7 +1065,7 @@ previewers.autocommands = defaulter(function(_)
         end
       end
 
-      vim.api.nvim_buf_add_highlight(self.state.bufnr, ns_previewer, "TelescopePreviewLine", selected_row + 1, 0, -1)
+      -- vim.api.nvim_buf_add_highlight(self.state.bufnr, ns_previewer, "TelescopePreviewLine", selected_row + 1, 0, -1)
       -- set the cursor position after self.state.bufnr is connected to the
       -- preview window (which is scheduled in new_buffer_previewer)
       vim.schedule(function()
