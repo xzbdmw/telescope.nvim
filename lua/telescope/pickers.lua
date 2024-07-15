@@ -1192,6 +1192,7 @@ function Picker:set_selection(row)
       })
       vim.api.nvim_win_call(win, function()
         vim.cmd "norm! zz"
+        require("config.utils").adjust_view(0, 4)
       end)
       pcall(_G.indent_update, win)
       pcall(function()
