@@ -1615,10 +1615,19 @@ end
 --- Close the picker which has prompt with buffer number `prompt_bufnr`
 ---@param prompt_bufnr number
 function pickers.on_close_prompt(prompt_bufnr)
-  require("treesitter-context").close_all()
+  local action_state = require "telescope.actions.state"
   local status = state.get_status(prompt_bufnr)
   local picker = status.picker
-  require("telescope.actions.state").get_current_history():reset()
+
+  local previewer = action_state.get_current_picker(prompt_bufnr).previewer
+  if previewer then
+    if previewer.state ~= nil then
+      local preview_winid = previewer.state.winid
+      require("treesitter-context").close_stored_win(preview_winid)
+    end
+  end
+
+  action_state.get_current_history():reset()
 
   if type(picker.cache_picker) == "table" then
     local cached_pickers = state.get_global_key "cached_pickers" or {}
