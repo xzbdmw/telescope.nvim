@@ -1310,21 +1310,13 @@ function make_entry.gen_from_git_status(opts)
   opts = opts or {}
 
   local col_width = ((opts.git_icons and opts.git_icons.added) and opts.git_icons.added:len() + 2) or 2
-  local displayer = entry_display.create {
-    separator = "",
-    items = {
-      { width = col_width },
-      { width = col_width },
-      { remaining = true },
-    },
-  }
 
   local icons = vim.tbl_extend("keep", opts.git_icons or {}, git_icon_defaults)
 
   local git_abbrev = {
     ["A"] = { icon = icons.added, hl = "TelescopeResultsDiffAdd" },
     ["U"] = { icon = icons.unmerged, hl = "TelescopeResultsDiffAdd" },
-    ["M"] = { icon = icons.changed, hl = "TelescopeResultsDiffChange" },
+    ["M"] = { icon = "M", hl = "TelescopeResultsDiffChange" },
     ["C"] = { icon = icons.copied, hl = "TelescopeResultsDiffChange" },
     ["R"] = { icon = icons.renamed, hl = "TelescopeResultsDiffChange" },
     ["D"] = { icon = icons.deleted, hl = "TelescopeResultsDiffDelete" },
@@ -1338,10 +1330,24 @@ function make_entry.gen_from_git_status(opts)
     local status_y = git_abbrev[y] or {}
 
     local empty_space = " "
+
+    local basename = utils.path_tail(entry.path)
+    local icon, icon_highlight =
+      require("nvim-web-devicons").get_icon(basename, utils.file_extension(basename), { default = false })
+    local displayer = entry_display.create {
+      separator = "",
+      items = {
+        { width = col_width },
+        { width = col_width },
+        { width = 2 },
+        { remaining = true },
+      },
+    }
     return displayer {
-      { status_x.icon or empty_space, status_x.hl },
-      { status_y.icon or empty_space, status_y.hl },
-      utils.transform_path(opts, entry.path),
+      { status_x.icon or empty_space, "TelescopeResultDiffStaged" },
+      { status_y.icon or empty_space, "TelescopeResultDiffUnStaged" },
+      { icon, icon_highlight },
+      { utils.transform_path(opts, entry.path), status_y.icon and "Variable" or "TelescopeResultDiffStaged" },
     }
   end
 
@@ -1349,8 +1355,12 @@ function make_entry.gen_from_git_status(opts)
     if entry == "" then
       return nil
     end
-
-    local mod, file = entry:match "^(..) (.+)$"
+    local mod, file
+    if opts.commit then
+      mod, file = entry:match "^([MADRCU])\t(.+)$"
+    else
+      mod, file = entry:match "^(..) (.+)$"
+    end
     -- Ignore entries that are the PATH in XY ORIG_PATH PATH
     -- (renamed or copied files)
     if not mod then

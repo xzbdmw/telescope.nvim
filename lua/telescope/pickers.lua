@@ -511,7 +511,7 @@ end
 ---@param bufnr number: the buffer number to be used in the window
 ---@param popup_opts table: options to pass to `popup.create`
 function Picker:_create_window(bufnr, popup_opts)
-  if popup_opts.height > 25 then
+  if popup_opts.height > 26 then
     pcall(function()
       require("treesitter-context").close_all()
     end)

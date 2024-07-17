@@ -369,10 +369,16 @@ git.status = function(opts)
     return
   end
 
-  local args = { "status", "--porcelain=v1", "--", "." }
+  local args
+  local commit_hash = opts.commit
+  if commit_hash == nil then
+    args = { "status", "--porcelain=v1", "--", "." }
+  else
+    args = { "diff", "--name-status", commit_hash }
+  end
 
   local gen_new_finder = function()
-    if vim.F.if_nil(opts.expand_dir, true) then
+    if vim.F.if_nil(opts.expand_dir, true) and opts.commit == nil then
       table.insert(args, #args - 1, "-uall")
     end
     local git_cmd = git_command(args, opts)
