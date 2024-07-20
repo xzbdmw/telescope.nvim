@@ -1163,8 +1163,11 @@ function Picker:set_selection(row)
   -- TODO: Get row & text in the same obj
   self._selection_entry = entry
   self._selection_row = row
-
-  vim.api.nvim_win_set_cursor(self.results_win, { row + 1, 0 })
+  if self.results_win == vim.api.nvim_get_current_win() then
+    vim.api.nvim_win_set_cursor(0, { row + 1, vim.api.nvim_win_get_cursor(0)[2] })
+  else
+    vim.api.nvim_win_set_cursor(self.results_win, { row + 1, 0 })
+  end
   if _G.aerial == true then
     pcall(function()
       local e = self:get_selection()
@@ -1690,6 +1693,9 @@ function pickers.on_close_prompt(prompt_bufnr)
     buffer = prompt_bufnr,
   }
   picker.close_windows(status)
+  vim.api.nvim_exec_autocmds({ "User" }, {
+    pattern = "TelescopeClose",
+  })
   if _G.aerial then
     local ns = vim.api.nvim_create_namespace "symbol_highlight"
     if vim.api.nvim_buf_is_valid(_G.a_buf) and vim.api.nvim_win_is_valid(_G.a_win) then
