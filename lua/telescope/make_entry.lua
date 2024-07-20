@@ -420,7 +420,7 @@ function make_entry.gen_from_git_commits(opts)
 
   local make_display = function(entry)
     return displayer {
-      { entry.value, "TelescopeResultsIdentifier" },
+      { entry.value, "CmpGhostText" },
       entry.msg,
     }
   end
