@@ -405,7 +405,7 @@ git.status = function(opts)
           if lines == 0 and prompt == "" then
             utils.notify("builtin.git_status", {
               msg = "No changes found",
-              level = "ERROR",
+              level = "INFO",
             })
             actions.close(self.prompt_bufnr)
           end
