@@ -1163,11 +1163,13 @@ function Picker:set_selection(row)
   -- TODO: Get row & text in the same obj
   self._selection_entry = entry
   self._selection_row = row
+  local status_updater = self:get_status_updater(self.prompt_win, self.prompt_bufnr)
   if self.results_win == vim.api.nvim_get_current_win() then
     vim.api.nvim_win_set_cursor(0, { row + 1, vim.api.nvim_win_get_cursor(0)[2] })
   else
     vim.api.nvim_win_set_cursor(self.results_win, { row + 1, 0 })
   end
+  status_updater()
   if _G.aerial == true then
     pcall(function()
       local e = self:get_selection()

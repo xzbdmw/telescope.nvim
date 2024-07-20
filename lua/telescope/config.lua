@@ -367,6 +367,8 @@ append(
 append(
   "get_status_text",
   function(self, opts)
+    local winid = self.layout.results.winid
+    local cursor_line = vim.api.nvim_win_get_cursor(winid)[1]
     local multi_select_cnt = #(self:get_multi_selection())
     local showing_cnt = (self.stats.processed or 0) - (self.stats.filtered or 0)
     local total_cnt = self.stats.processed or 0
@@ -376,14 +378,18 @@ append(
     if opts and not opts.completed then
       status_icon = "*"
     end
-
-    if showing_cnt == 0 and total_cnt == 0 then
-      status_text = status_icon
-    elseif multi_select_cnt == 0 then
-      status_text = string.format("%s %s / %s", status_icon, showing_cnt, total_cnt)
+    if multi_select_cnt == 0 then
+      status_text = string.format("%s/%s", cursor_line, total_cnt)
     else
-      status_text = string.format("%s %s / %s / %s", status_icon, multi_select_cnt, showing_cnt, total_cnt)
+      status_text = string.format("%s/%s (%s)", cursor_line, total_cnt, multi_select_cnt)
     end
+    -- if showing_cnt == 0 and total_cnt == 0 then
+    --   status_text = status_icon
+    -- elseif multi_select_cnt == 0 then
+    --   status_text = string.format("%s %s / %s", status_icon, showing_cnt, total_cnt)
+    -- else
+    --   status_text = string.format("%s %s / %s / %s", status_icon, multi_select_cnt, showing_cnt, total_cnt)
+    -- end
 
     -- quick workaround for extmark right_align side-scrolling limitation
     -- https://github.com/nvim-telescope/telescope.nvim/issues/2929
