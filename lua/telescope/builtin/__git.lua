@@ -385,6 +385,7 @@ git.status = function(opts)
     opts.entry_maker = vim.F.if_nil(opts.entry_maker, make_entry.gen_from_git_status(opts))
     return finders.new_oneshot_job(git_cmd, opts)
   end
+  vim.g.git_finer = gen_new_finder
 
   local initial_finder = gen_new_finder()
   if not initial_finder then
