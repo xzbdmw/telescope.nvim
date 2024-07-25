@@ -556,7 +556,8 @@ previewers.vimgrep = defaulter(function(opts)
   return previewers.new_buffer_previewer {
     title = "Grep Preview",
     dyn_title = function(_, entry)
-      return Path:new(from_entry.path(entry, false, false)):normalize(cwd)
+      local path = Path:new(from_entry.path(entry, false, false)):normalize(cwd)
+      return vim.fs.basename(path)
     end,
 
     get_buffer_by_name = function(_, entry)
