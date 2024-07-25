@@ -702,15 +702,15 @@ function Picker:find()
 
   vim.api.nvim_create_augroup("PickerInsert", {})
   -- TODO: Use WinLeave as well?
-  vim.api.nvim_create_autocmd("BufLeave", {
-    buffer = self.prompt_bufnr,
-    group = "PickerInsert",
-    nested = true,
-    once = true,
-    callback = function()
-      require("telescope.pickers").on_close_prompt(self.prompt_bufnr)
-    end,
-  })
+  -- vim.api.nvim_create_autocmd("BufLeave", {
+  --   buffer = self.prompt_bufnr,
+  --   group = "PickerInsert",
+  --   nested = true,
+  --   once = true,
+  --   callback = function()
+  --     require("telescope.pickers").on_close_prompt(self.prompt_bufnr)
+  --   end,
+  -- })
   vim.api.nvim_create_autocmd("VimResized", {
     buffer = self.prompt_bufnr,
     group = "PickerInsert",
