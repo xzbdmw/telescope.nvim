@@ -184,14 +184,14 @@ previewers.new_termopen_previewer = function(opts)
     bufentry_table = {}
   end
 
-  function opts.preview_fn(self, entry, status)
+  function opts.preview_fn(self, entry, status, command)
     local preview_winid = status.layout.preview and status.layout.preview.winid
     if get_bufnr(self) == nil then
       set_bufnr(self, vim.api.nvim_win_get_buf(preview_winid))
     end
 
     local prev_bufnr = get_bufnr_by_bufentry(self, entry)
-    if prev_bufnr then
+    if prev_bufnr and not command then
       self.state.termopen_bufnr = prev_bufnr
       utils.win_set_buf_noautocmd(preview_winid, self.state.termopen_bufnr)
       self.state.termopen_id = term_ids[self.state.termopen_bufnr]
@@ -204,8 +204,8 @@ previewers.new_termopen_previewer = function(opts)
         cwd = opts.cwd or vim.loop.cwd(),
         env = conf.set_env,
       }
-
-      local cmd = opts.get_command(entry, status)
+      local cmd = command
+      cmd = cmd or opts.get_command(entry, status)
       if cmd then
         vim.api.nvim_buf_call(bufnr, function()
           set_term_id(self, vim.fn.termopen(cmd, term_opts))

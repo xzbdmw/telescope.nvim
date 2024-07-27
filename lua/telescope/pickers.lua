@@ -1708,6 +1708,8 @@ function pickers.on_close_prompt(prompt_bufnr)
     end
   end
   _G.aerial = false
+  vim.g.stage_title = ""
+  vim.g.last_staged_title_path = ""
 end
 
 function pickers.on_resize_window(prompt_bufnr)
