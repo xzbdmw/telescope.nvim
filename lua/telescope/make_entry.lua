@@ -1324,6 +1324,9 @@ function make_entry.gen_from_git_status(opts)
   }
 
   local make_display = function(entry)
+    if string.len(entry.status) == 1 then
+      entry.status = " M"
+    end
     local x = string.sub(entry.status, 1, 1)
     local y = string.sub(entry.status, -1)
     local status_x = git_abbrev[x] or {}
