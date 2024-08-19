@@ -1325,7 +1325,7 @@ function make_entry.gen_from_git_status(opts)
 
   local make_display = function(entry)
     if string.len(entry.status) == 1 then
-      entry.status = " M"
+      entry.status = " D"
     end
     local x = string.sub(entry.status, 1, 1)
     local y = string.sub(entry.status, -1)
