@@ -1200,9 +1200,9 @@ function Picker:set_selection(row)
         vim.cmd "norm! zz"
         require("config.utils").adjust_view(0, 4)
       end)
-      pcall(_G.indent_update, win)
+      _G.hlchunk_clear(nil, nil, buffer)
       pcall(function()
-        require("treesitter-context").context_force_update(buffer, win)
+        require("treesitter-context").context_hlslens_force_update(buffer, win)
       end)
     end)
   end
