@@ -1,6 +1,8 @@
 local ts_utils = require "telescope.utils"
 local strings = require "plenary.strings"
 local conf = require("telescope.config").values
+local state = require "telescope.state"
+local action_state = require "telescope.actions.state"
 
 local Job = require "plenary.job"
 local Path = require "plenary.path"
@@ -147,13 +149,16 @@ utils.highlighter = function(bufnr, ft, opts)
     return opts.preview.treesitter.enable == nil or opts.preview.treesitter.enable == true
   end)()
 
-  local ts_success
-  if ts_highlighting then
-    ts_success = utils.ts_highlighter(bufnr, ft)
-  end
-  if not ts_highlighting or ts_success == false then
-    utils.regex_highlighter(bufnr, ft)
-  end
+  vim.schedule(function()
+    local prompt_bufnr = state.get_existing_prompt_bufnrs()[1]
+    local picker = action_state.get_current_picker(prompt_bufnr)
+    if picker ~= nil then
+      local current_bufnr = picker.previewer.state.bufnr
+      if vim.api.nvim_buf_is_valid(bufnr) and bufnr == current_bufnr then
+        utils.ts_highlighter(bufnr, ft)
+      end
+    end
+  end)
 end
 
 --- Attach regex highlighter
