@@ -512,16 +512,13 @@ end
 ---@param popup_opts table: options to pass to `popup.create`
 function Picker:_create_window(bufnr, popup_opts)
   local height = vim.o.lines
-  if popup_opts.height >= vim.o.lines - 6 then
+  if popup_opts.height >= vim.o.lines - 10 then
     pcall(function()
       require("treesitter-context").close_all()
     end)
   end
   popup_opts.zindex = 32
-  if popup_opts.highlight == "TelescopePreviewNormal" then
-    popup_opts.zindex = 30
-  end
-  _G.no_animation()
+  -- _G.no_animation()
   local what = bufnr or ""
   local win, opts = popup.create(what, popup_opts)
 
@@ -579,7 +576,7 @@ function Picker:find()
   --
   -- This just lets us stop doing stuff after tons of  things.
   -- self.max_results = self.__scrolling_limit
-  self.max_results = 1000
+  self.max_results = 250
 
   vim.api.nvim_buf_set_lines(self.results_bufnr, 0, self.max_results, false, utils.repeated_table(self.max_results, ""))
 
@@ -1206,6 +1203,9 @@ function Picker:set_selection(row)
       end)
     end)
   end
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "TelescopeSetSelection",
+  })
 end
 
 --- Update prefix for entry on a given row
