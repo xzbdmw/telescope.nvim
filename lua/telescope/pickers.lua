@@ -511,16 +511,42 @@ end
 ---@param bufnr number: the buffer number to be used in the window
 ---@param popup_opts table: options to pass to `popup.create`
 function Picker:_create_window(bufnr, popup_opts)
+  if vim.g.hide_prompt then
+    if popup_opts.highlight == "TelescopeResultsNormal" then
+      popup_opts.line = popup_opts.line
+      popup_opts.height = 1
+      popup_opts.minheight = 1
+      popup_opts.zindex = 2000
+    end
+    if popup_opts.highlight == "TelescopePromptNormal" then
+      popup_opts.line = popup_opts.line + 3
+      popup_opts.zindex = 20
+    end
+  end
   local height = vim.o.lines
   if popup_opts.height >= vim.o.lines - 10 then
     pcall(function()
       require("treesitter-context").close_all()
     end)
   end
-  popup_opts.zindex = 32
-  -- _G.no_animation()
   local what = bufnr or ""
   local win, opts = popup.create(what, popup_opts)
+
+  if vim.g.hide_prompt then
+    local hl = api.nvim_get_hl_by_name("Cursor", true)
+    hl.blend = 100
+    vim.opt.guicursor:append "a:Cursor/lCursor"
+    pcall(api.nvim_set_hl, 0, "Cursor", hl)
+    vim.api.nvim_create_autocmd("BufLeave", {
+      buffer = vim.api.nvim_win_get_buf(win),
+      callback = function(args)
+        local old_hl = hl
+        old_hl.blend = 0
+        vim.opt.guicursor:remove "a:Cursor/lCursor"
+        pcall(vim.api.nvim_set_hl, 0, "Cursor", old_hl)
+      end,
+    })
+  end
 
   a.nvim_win_set_option(win, "winblend", self.window.winblend)
   local border_win = opts and opts.border and opts.border.win_id
