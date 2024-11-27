@@ -66,8 +66,10 @@ end
 
 git.commits = function(opts)
   opts.entry_maker = vim.F.if_nil(opts.entry_maker, make_entry.gen_from_git_commits(opts))
-  opts.git_command =
-    vim.F.if_nil(opts.git_command, git_command({ "log", "--pretty=oneline", "--abbrev-commit", "--", "." }, opts))
+  opts.git_command = vim.F.if_nil(
+    opts.git_command,
+    git_command({ "log", "--max-count=250", "--pretty=oneline", "--abbrev-commit", "--", "." }, opts)
+  )
 
   pickers
     .new(opts, {
