@@ -1655,7 +1655,9 @@ function pickers.on_close_prompt(prompt_bufnr)
   if previewer then
     if previewer.state ~= nil then
       local preview_winid = previewer.state.winid
-      require("treesitter-context").close_stored_win(preview_winid)
+      pcall(function(...)
+        require("treesitter-context").close_stored_win(preview_winid)
+      end)
     end
   end
 
@@ -1729,9 +1731,13 @@ function pickers.on_close_prompt(prompt_bufnr)
     local ns = vim.api.nvim_create_namespace "symbol_highlight"
     if vim.api.nvim_buf_is_valid(_G.a_buf) and vim.api.nvim_win_is_valid(_G.a_win) then
       vim.api.nvim_buf_clear_namespace(_G.a_buf, ns, 0, -1)
-      vim.api.nvim_win_call(_G.a_win, function()
-        vim.fn.winrestview(_G.aerial_view)
-      end)
+      if vim.g.restore_view then
+        vim.api.nvim_win_call(_G.a_win, function()
+          vim.fn.winrestview(_G.aerial_view)
+        end)
+      else
+        vim.g.restore_view = true
+      end
     end
   end
   _G.aerial = false

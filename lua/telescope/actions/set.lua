@@ -128,10 +128,8 @@ action_set.edit = function(prompt_bufnr, command)
   local entry = action_state.get_selected_entry()
 
   if not entry then
-    utils.notify("actions.set.edit", {
-      msg = "Nothing currently selected",
-      level = "WARN",
-    })
+    vim.g.restore_view = false
+    require("telescope.actions").close(prompt_bufnr)
     return
   end
 
