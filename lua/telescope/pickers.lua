@@ -88,17 +88,8 @@ local function default_create_layout(picker)
         popup_opts.preview.titlehighlight = "TelescopePreviewTitle"
       end
 
-      local results_win, results_opts = picker:_create_window("", popup_opts.results)
-      local results_bufnr = a.nvim_win_get_buf(results_win)
-
-      self.results = Layout.Window {
-        winid = results_win,
-        bufnr = results_bufnr,
-        border = make_border(results_opts.border),
-      }
-
       if popup_opts.preview then
-        local preview_win, preview_opts = picker:_create_window("", popup_opts.preview)
+        local preview_win, preview_opts = picker:_create_window("", popup_opts.preview, popup_opts.preview)
         local preview_bufnr = a.nvim_win_get_buf(preview_win)
 
         self.preview = Layout.Window {
@@ -107,8 +98,16 @@ local function default_create_layout(picker)
           border = make_border(preview_opts.border),
         }
       end
+      local results_win, results_opts = picker:_create_window("", popup_opts.results, popup_opts.preview)
+      local results_bufnr = a.nvim_win_get_buf(results_win)
 
-      local prompt_win, prompt_opts = picker:_create_window("", popup_opts.prompt)
+      self.results = Layout.Window {
+        winid = results_win,
+        bufnr = results_bufnr,
+        border = make_border(results_opts.border),
+      }
+
+      local prompt_win, prompt_opts = picker:_create_window("", popup_opts.prompt, popup_opts.preview)
       local prompt_bufnr = a.nvim_win_get_buf(prompt_win)
 
       self.prompt = Layout.Window {
@@ -510,7 +509,7 @@ end
 --- A helper function for creating each of the windows in a picker
 ---@param bufnr number: the buffer number to be used in the window
 ---@param popup_opts table: options to pass to `popup.create`
-function Picker:_create_window(bufnr, popup_opts)
+function Picker:_create_window(bufnr, popup_opts, has_preview)
   if vim.g.hide_prompt then
     if popup_opts.highlight == "TelescopeResultsNormal" then
       popup_opts.line = popup_opts.line
@@ -528,6 +527,32 @@ function Picker:_create_window(bufnr, popup_opts)
     pcall(function()
       require("treesitter-context").close_all()
     end)
+  end
+
+  if vim.g.neovide then
+    -- It is too high now for smart open etc
+    if not has_preview then
+      popup_opts.line = popup_opts.line + 1
+    end
+    if popup_opts.borderhighlight == "TelescopeResultsBorder" then
+      popup_opts.line = popup_opts.line - 1
+      popup_opts.borderchars = { "─", "─", "", "", "─", "─", "", "" }
+      if popup_opts.height <= 25 then
+        popup_opts.minheight = popup_opts.minheight + 2
+      else
+        popup_opts.minheight = popup_opts.minheight + 1
+      end
+    end
+    if popup_opts.borderhighlight == "TelescopePreviewBorder" then
+      if has_preview then
+        if popup_opts.height > 25 then
+          popup_opts.borderchars = { "", "", "", "│", "", "", "", "" }
+        else
+          popup_opts.borderchars = { "─", "─", "", "", "─", "─", "", "" }
+        end
+      end
+      popup_opts.line = popup_opts.line
+    end
   end
   local what = bufnr or ""
   local win, opts = popup.create(what, popup_opts)
@@ -1316,7 +1341,6 @@ function Picker:cycle_previewers(next)
     self.hidden_previewer = self.all_previewers[self.current_previewer_index]
   end
 end
-
 --- Handler for when entries are added by `self.manager`
 ---@param index number: the index to add the entry at
 ---@param entry table: the entry that has been added to the manager
