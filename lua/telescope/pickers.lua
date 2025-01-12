@@ -1673,7 +1673,14 @@ function pickers.on_close_prompt(prompt_bufnr)
     end
 
     -- if picker was disabled post-hoc (e.g. `cache_picker = false` conclude after deletion)
-    if picker.cache_picker.disabled ~= true and picker.prompt_title == "Live Grep" then
+    if
+      picker.cache_picker.disabled ~= true
+      and (
+        picker.prompt_title == "Live Grep"
+        or picker.prompt_title == "Key Maps"
+        or picker.prompt_title == "Highlights"
+      )
+    then
       if picker.cache_picker.limit_entries > 0 then
         -- edge case: starting in normal mode and not having run a search means having no manager instantiated
         if picker.manager then
