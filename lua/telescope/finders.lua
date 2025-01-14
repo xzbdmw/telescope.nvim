@@ -6,6 +6,7 @@ local log = require "telescope.log"
 local async_static_finder = require "telescope.finders.async_static_finder"
 local async_oneshot_finder = require "telescope.finders.async_oneshot_finder"
 local async_job_finder = require "telescope.finders.async_job_finder"
+local async_job_finder_bulk = require "telescope.finders.async_job_finder_bulk"
 
 local finders = {}
 
@@ -173,8 +174,24 @@ finders.new_async_job = function(opts)
   return async_job_finder(opts)
 end
 
+finders.new_async_job_bulk = function(opts)
+  if opts.writer then
+    return finders._new(opts)
+  end
+
+  return async_job_finder_bulk(opts)
+end
+
 finders.new_job = function(command_generator, entry_maker, _, cwd)
   return async_job_finder {
+    command_generator = command_generator,
+    entry_maker = entry_maker,
+    cwd = cwd,
+  }
+end
+
+finders.new_bulk_job = function(command_generator, entry_maker, _, cwd)
+  return async_job_finder_bulk {
     command_generator = command_generator,
     entry_maker = entry_maker,
     cwd = cwd,

@@ -197,6 +197,70 @@ function LinesPipe:iter(schedule)
   end
 end
 
+function LinesPipe:bulk_iter(schedule)
+  if schedule == nil then
+    schedule = true
+  end
+
+  local text = nil
+  local index = nil
+
+  local get_next_text = function(previous)
+    index = nil
+
+    local read = self:read()
+    if previous == nil and read == nil then
+      return
+    end
+
+    read = string.gsub(read or "", "\r", "")
+    return (previous or "") .. read
+  end
+
+  local next_value = nil
+  local results = {}
+  next_value = function()
+    if schedule then
+      async.util.scheduler()
+    end
+
+    if text == nil or (text == "" and index == nil) then
+      return nil
+    end
+
+    local count = 0
+    for _ in string.gmatch(text, "\n") do
+      count = count + 1
+    end
+
+    for i = 1, count do
+      local start = index
+      index = string.find(text, "\n", index, true)
+      if index == nil then
+        text = get_next_text(string.sub(text, start or 1))
+        return next_value()
+      end
+      table.insert(results, string.sub(text, start or 1, index - 1))
+      index = index + 1
+    end
+
+    if count == 0 then
+      text = get_next_text(string.sub(text, start or 1))
+      return next_value()
+    end
+
+    local res = vim.deepcopy(results)
+    results = {}
+    return res
+  end
+
+  text = get_next_text()
+
+  return function()
+    return next_value()
+  end
+end
+
 ---@class NullPipe : BasePipe
 local NullPipe = BasePipe:extend()
 
