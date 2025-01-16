@@ -537,7 +537,7 @@ function Picker:_create_window(bufnr, popup_opts, has_preview)
     if popup_opts.borderhighlight == "TelescopeResultsBorder" then
       popup_opts.line = popup_opts.line - 1
       popup_opts.borderchars = { "─", "─", "", "", "─", "─", "", "" }
-      if popup_opts.height <= 25 then
+      if popup_opts.height <= 17 then
         popup_opts.minheight = popup_opts.minheight + 2
       else
         popup_opts.minheight = popup_opts.minheight + 1
@@ -545,8 +545,8 @@ function Picker:_create_window(bufnr, popup_opts, has_preview)
     end
     if popup_opts.borderhighlight == "TelescopePreviewBorder" then
       if has_preview then
-        if popup_opts.height > 25 then
-          popup_opts.borderchars = { "", "", "", "│", "", "", "", "" }
+        if popup_opts.height > 17 then
+          popup_opts.borderchars = { " ", "", "", "│", "", "", "", "" }
         else
           popup_opts.borderchars = { "─", "─", "", "", "─", "─", "", "" }
         end
