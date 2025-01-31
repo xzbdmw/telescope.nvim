@@ -906,6 +906,7 @@ local entry_to_qf = function(entry)
       text = entry.value
     end
   end
+  text = text:gsub("%s*$", "")
 
   return {
     bufnr = entry.bufnr,
