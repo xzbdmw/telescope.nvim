@@ -545,7 +545,7 @@ previewers.vimgrep = defaulter(function(opts)
       -- end
 
       local middle_ln = math.floor(lnum + (lnend - lnum) / 2)
-      vim.api.nvim_win_set_option(self.state.winid, "cursorline", true)
+      -- vim.api.nvim_win_set_option(self.state.winid, "cursorline", true)
       pcall(vim.api.nvim_win_set_cursor, self.state.winid, { middle_ln + 1, 0 })
       vim.api.nvim_buf_call(bufnr, function()
         vim.cmd "norm! zz"
