@@ -510,6 +510,13 @@ end
 ---@param bufnr number: the buffer number to be used in the window
 ---@param popup_opts table: options to pass to `popup.create`
 function Picker:_create_window(bufnr, popup_opts, has_preview)
+  if _G.aerial then
+    if vim.g.neovide then
+      popup_opts.line = popup_opts.line - 7
+    else
+      popup_opts.line = popup_opts.line - 5
+    end
+  end
   if vim.g.hide_prompt then
     if popup_opts.highlight == "TelescopeResultsNormal" then
       popup_opts.line = popup_opts.line
