@@ -714,13 +714,13 @@ function Picker:find()
         local process_result = self:get_result_processor(find_id, prompt, debounced_status)
         local process_complete = self:get_result_completor(self.results_bufnr, find_id, prompt, status_updater)
 
-        local ok, msg = pcall(function()
-          self.finder(prompt, process_result, process_complete)
-        end)
+        -- local ok, msg = pcall(function()
+        self.finder(prompt, process_result, process_complete)
+        -- end)
 
-        if not ok then
-          log.warn("Finder failed with msg: ", msg)
-        end
+        -- if not ok then
+        --   log.warn("Finder failed with msg: ", msg)
+        -- end
 
         local diff_time = (vim.loop.hrtime() - start_time) / 1e6
         if self.debounce and diff_time < self.debounce then

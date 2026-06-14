@@ -154,7 +154,7 @@ utils.highlighter = function(bufnr, ft, opts)
     if ft == "javascript" and vim.api.nvim_buf_line_count(bufnr) < 3 then
       return
     end
-    ts_success = utils.ts_highlighter(bufnr, ft)
+    ts_success = pcall(utils.ts_highlighter, bufnr, ft)
   end
   if not ts_highlighting or ts_success == false then
     utils.regex_highlighter(bufnr, ft)

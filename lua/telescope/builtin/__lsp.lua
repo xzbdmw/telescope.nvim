@@ -304,7 +304,11 @@ lsp.workspace_symbols = function(opts)
       return
     end
 
-    local locations = vim.lsp.util.symbols_to_items(server_result or {}, opts.bufnr) or {}
+    local locations = vim.lsp.util.symbols_to_items(
+      server_result or {},
+      opts.bufnr,
+      vim.lsp.get_clients()[1].offset_encoding
+    ) or {}
     locations = utils.filter_symbols(locations, opts, symbols_sorter)
     if locations == nil then
       -- error message already printed in `utils.filter_symbols`
@@ -351,7 +355,7 @@ local function get_workspace_symbols_requester(bufnr, opts)
     local err, res = rx()
     assert(not err, err)
 
-    local locations = vim.lsp.util.symbols_to_items(res or {}, bufnr) or {}
+    local locations = vim.lsp.util.symbols_to_items(res or {}, bufnr, vim.lsp.get_clients()[1].offset_encoding) or {}
     if not vim.tbl_isempty(locations) then
       locations = utils.filter_symbols(locations, opts, symbols_sorter) or {}
     end
